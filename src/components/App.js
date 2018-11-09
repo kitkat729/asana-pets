@@ -1,7 +1,10 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
+import { Route } from 'react-router-dom'
 import Header from './GlobalHeader'
 import Footer from './GlobalFooter'
-import '../app.css';
+import Gallery from '../containers/Gallery'
+
+import '../app.css'
 
 class App extends Component {
     constructor(props) {
@@ -13,6 +16,7 @@ class App extends Component {
         return (
             <div className="app">
                 <Header />
+                    <Route path="/gallery" render={ (routerProps) => (<Gallery {...routerProps} />)} />
                 <Footer />
             </div>
         )
