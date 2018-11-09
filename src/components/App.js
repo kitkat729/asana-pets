@@ -16,7 +16,7 @@ class App extends Component {
         return (
             <div className="app">
                 <Header />
-                    <Route path="/gallery" render={ (routerProps) => (<Gallery {...routerProps} />)} />
+                <Route path="/gallery" render={ (routerProps) => (<Gallery {...routerProps} />)} />
                 <Footer />
             </div>
         )
