@@ -15,13 +15,16 @@ const MasonryCard = (props) => {
 
     return (
         <li className="card">
-            <img
-                srcSet={srcSet.join(',')}
-                sizes={sizes.join(',')}
-                className="card-img-top img-fluid"
-                src={item.photo.urls.regular}
-                alt={typeof item.photo.description !==  undefined ? item.photo.description : ''}
-            />
+            <figure itemProp="image" itemScope itemType="http://schema.org/ImageObject">
+                <img
+                    itemProp="thumbnail"
+                    srcSet={srcSet.join(',')}
+                    sizes={sizes.join(',')}
+                    className="card-img-top img-fluid"
+                    src={item.photo.urls.regular}
+                    alt={typeof item.photo.description !==  undefined ? item.photo.description : ''}
+                />
+            </figure>
         </li>
     )
 }

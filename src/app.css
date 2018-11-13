@@ -32,6 +32,10 @@ ul li {
   text-align: center;
 }
 
+.app .gallery figure {
+  margin: 0;
+}
+
 /* Global Header */
 .global-header {
   padding-bottom: 2rem;
