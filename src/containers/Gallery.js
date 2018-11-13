@@ -3,16 +3,19 @@ import axios from 'axios'
 import classNames from 'classnames'
 import ListItem from '../components/ListItem'
 import MasonryCard from '../components/MasonryCard'
+import Popup from './Popup'
 
 class Gallery extends Component {
     constructor(props) {
         super(props)
 
         this.state = {
-            list: []
+            list: [],
+            popup: ''
         }
 
         this.layout = this.props.config.layout
+        this.handleItemClick = this.handleItemClick.bind(this)
     }
 
     componentDidMount() {
@@ -67,6 +70,22 @@ class Gallery extends Component {
         })
     }
 
+    handleItemClick(e) {
+        const item = this.state.list.filter(item => item.photo.id === e.target.id)[0]
+
+        let styleDiv = {
+            backgroundImage: 'url(' + item.photo.urls.full + ')'
+        }
+        const popup = (
+            <Popup key={Date.now()}>
+                <div className="thumbnail-large" style={styleDiv} />
+            </Popup>
+        )
+        this.setState({
+            popup: popup
+        })
+    }
+
     render() {
         let list = []
         let listClasses = []
@@ -74,10 +93,10 @@ class Gallery extends Component {
         // list items
         this.state.list.forEach((item, i) => {
             if (this.layout === 'masonry') {
-                list.push(<MasonryCard key={item.photo.id} item={item} />)
+                list.push(<MasonryCard key={item.photo.id} item={item} onClick={this.handleItemClick} />)
             }
             else {
-                list.push(<ListItem key={item.photo.id} item={item} />)
+                list.push(<ListItem key={item.photo.id} item={item} onClick={this.handleItemClick} />)
             }
         })
 
@@ -87,10 +106,13 @@ class Gallery extends Component {
         }
 
         return (
-            <div className="gallery container">
-                <ul className={classNames(listClasses)}>
-                    {list}
-                </ul>
+            <div>
+                {this.state.popup}
+                <div className="gallery container">
+                    <ul className={classNames(listClasses)}>
+                        {list}
+                    </ul>
+                </div>
             </div>
         )
     }
