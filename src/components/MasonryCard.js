@@ -4,7 +4,7 @@ const MasonryCard = (props) => {
     const {item} = props
 
     return (
-        <li class="card">
+        <li className="card">
             <img
                 className="card-img-top img-fluid"
                 src={item.photo.urls.thumb}
