@@ -1,7 +1,8 @@
 import React, { Component } from 'react'
 import axios from 'axios'
-
+import classNames from 'classnames'
 import ListItem from '../components/ListItem'
+import MasonryCard from '../components/MasonryCard'
 
 class Gallery extends Component {
     constructor(props) {
@@ -10,6 +11,8 @@ class Gallery extends Component {
         this.state = {
             list: []
         }
+
+        this.layout = this.props.config.layout
     }
 
     componentDidMount() {
@@ -66,14 +69,26 @@ class Gallery extends Component {
 
     render() {
         let list = []
+        let listClasses = []
 
+        // list items
         this.state.list.forEach((item, i) => {
-            list.push(<ListItem key={item.photo.id} item={item} />)
+            if (this.layout === 'masonry') {
+                list.push(<MasonryCard key={item.photo.id} item={item} />)
+            }
+            else {
+                list.push(<ListItem key={item.photo.id} item={item} />)
+            }
         })
 
+        // css classes
+        if (this.layout === 'masonry') {
+            listClasses.push('card-columns')
+        }
+
         return (
-            <div className="gallery">
-                <ul className="">
+            <div className="gallery container">
+                <ul className={classNames(listClasses)}>
                     {list}
                 </ul>
             </div>

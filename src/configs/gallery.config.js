@@ -7,6 +7,9 @@ const services = {
     }
 }
 
+const layout = 'masonry'    // default|masonry
+
 export const config = {
-    services
+    services,
+    layout
 }
