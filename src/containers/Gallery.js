@@ -4,6 +4,7 @@ import classNames from 'classnames'
 import ListItem from '../components/ListItem'
 import MasonryCard from '../components/MasonryCard'
 import Popup from './Popup'
+import uuid from 'uuid/v1'  // generate unique id
 
 class Gallery extends Component {
     constructor(props) {
@@ -16,50 +17,76 @@ class Gallery extends Component {
 
         this.layout = this.props.config.layout
         this.handleItemClick = this.handleItemClick.bind(this)
+        this.listRef = React.createRef()
+
+        this.handleListScroll = this.handleListScroll.bind(this)
+        this.fetching = false
     }
 
     componentDidMount() {
-        this.fetch('https://raw.githubusercontent.com/Asana/webdev-take-home-exercise/master/assets/data/dogs.json', this.state.list.length)
+        this.fetch('https://raw.githubusercontent.com/Asana/webdev-take-home-exercise/master/assets/data/dogs.json')
+            .then((values) => {
+                const baseCount = this.state.list.length
+
+                values.forEach((item, i) => {
+                    this.insert(item, (baseCount + i))
+                })
+            })
+
+        window.addEventListener('scroll', this.handleListScroll);
     }
 
-    fetch(url, baseIndex) {
-        axios.get(url)
-            .then((response) => {
-                if (response.status === 200) {
-                    // temporary reduce input to meet quotas
-                    //response.data.dogs = response.data.dogs.splice(0, 5)
+    componentWillUnmount() {
+        window.removeEventListener('scroll', this.handleListScroll);
+    }
 
-                    response.data.dogs.forEach((item, i) => {
-                        let sourceUrl = new URL(item.source)
+    fetch(url) {
+        const services = this.props.config.services
 
-                        // sourceUrl.hostname
-                        // sourceUrl.pathname
-                        if (typeof this.props.config.services[sourceUrl.hostname] !== undefined) {
-                            //https://github.com/axios/axios
-                            let dataApi = axios.create({
-                                baseURL: this.props.config.services[sourceUrl.hostname].api.host,
-                                timeout: 1000,
-                                headers: {
-                                    Authorization: 'Client-ID ' + this.props.config.services[sourceUrl.hostname].api.key
-                                }
-                            })
+        return new Promise(function(resolve){
+            axios.get(url)
+                .then((response) => {
+                    if (response.status === 200) {
+                        let promises = []
+                        let list = response.data.dogs
 
-                            dataApi.request({
-                                url: sourceUrl.pathname,
-                                responseType: 'json'
-                            })
-                                .then((response) => {
-                                    let listItem = item
-                                    listItem.photo = response.data
+                        list.forEach((item, i) => {
+                            let sourceUrl = new URL(item.source)
 
-                                    this.insert(listItem, (i+baseIndex))
+                            // sourceUrl.hostname
+                            // sourceUrl.pathname
+                            if (typeof services[sourceUrl.hostname] !== undefined) {
+                                let dataApi = axios.create({
+                                    baseURL: services[sourceUrl.hostname].api.host,
+                                    timeout: 1000,
+                                    headers: {
+                                        Authorization: 'Client-ID ' + services[sourceUrl.hostname].api.key
+                                    }
                                 })
-                        }
-                    })
-                }
+                                promises.push(dataApi.request({
+                                    url: sourceUrl.pathname,
+                                    responseType: 'json'
+                                }))
+                            }
+                        })
+
+                        Promise.all(promises)
+                            .then((values) => {
+                                list = list.map((item, i) => {
+                                    item.photo = values[i].data
+                                    return item
+                                })
+
+                                resolve(list)
+                            })
+                    }
+
+                })
+
             })
     }
 
+    // positional insertion
     insert(item, pos) {
         this.setState((state) => {
             state.list[pos] = item
@@ -86,21 +113,46 @@ class Gallery extends Component {
         })
     }
 
+    // Infinite scroll implementation
+    // - fetch data when the remaining content is less than X page height where 1 page height = 1 viewport height
+    handleListScroll(e) {
+        let n = 1.5
+
+        if ((window.scrollY + (n * window.innerHeight)) > this.listRef.current.scrollHeight) {
+            window.removeEventListener('scroll', this.handleListScroll);
+            this.fetching = true
+
+            this.fetch('https://raw.githubusercontent.com/Asana/webdev-take-home-exercise/master/assets/data/dogs.json')
+                .then((values) => {
+                    const baseCount = this.state.list.length
+
+                    values.forEach((item, i) => {
+                        this.insert(item, (baseCount + i))
+                    })
+
+                    this.fetching = false
+                    window.addEventListener('scroll', this.handleListScroll);
+                })
+        }
+    }
+
     render() {
         let list = []
         let listClasses = []
 
-        // list items
+        // build list items
         this.state.list.forEach((item, i) => {
+            const key = item.photo.id + '-' + uuid()
+
             if (this.layout === 'masonry') {
-                list.push(<MasonryCard key={item.photo.id} item={item} onClick={this.handleItemClick} />)
+                list.push(<MasonryCard key={key} item={item} onClick={this.handleItemClick} />)
             }
             else {
-                list.push(<ListItem key={item.photo.id} item={item} onClick={this.handleItemClick} />)
+                list.push(<ListItem key={key} item={item} onClick={this.handleItemClick} />)
             }
         })
 
-        // css classes
+        // build list css classes
         if (this.layout === 'masonry') {
             listClasses.push('card-columns')
         }
@@ -109,7 +161,7 @@ class Gallery extends Component {
             <div>
                 {this.state.popup}
                 <div className="gallery container">
-                    <ul className={classNames(listClasses)}>
+                    <ul className={classNames(listClasses)} ref={this.listRef}>
                         {list}
                     </ul>
                 </div>
