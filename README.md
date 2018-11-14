@@ -11,14 +11,14 @@ The project and issue tracking are setup on github
  
 The design was inspired by unsplash. I also like pinterest.
 
-![Screenshot](Site-screenshot)
+![Screenshot](Site-screenshot.png)
 
 The site was designed with responsive and good UX in mind. It has
 infinite scroll and was optimized for mobile devices. I used the
 same url to feed data multiple times. Don't be surprised if you see
 duplicate images when running the project.
 
-![Screenshot](Dup-images-screenshot)
+![Screenshot](Dup-images-screenshot.png)
 
 I also incorporate some SEO in the markup.
  
