@@ -116,7 +116,7 @@ class Gallery extends Component {
     // Infinite scroll implementation
     // - fetch data when the remaining content is less than X page height where 1 page height = 1 viewport height
     handleListScroll(e) {
-        let n = 1.5
+        let n = 2
 
         if ((window.scrollY + (n * window.innerHeight)) > this.listRef.current.scrollHeight) {
             window.removeEventListener('scroll', this.handleListScroll);
